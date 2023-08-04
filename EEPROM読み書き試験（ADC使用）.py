@@ -67,23 +67,23 @@ import time
 import utime
 
 #ピン初期化
+
+#0x50(eeprom)
+sda_pin2=machine.Pin(12) 
+scl_pin2=machine.Pin(13)
+i2c_eeprom=machine.I2C(0,sda = sda_pin2, scl = scl_pin2, freq = 100000)
+
 #0x68(adc)
 sda_pin1=machine.Pin(26) 
 scl_pin1=machine.Pin(27)
 i2c_adc=machine.I2C(1,sda = sda_pin1, scl = scl_pin1, freq = 100000)
 
-#0x50(eeprom)
-sda_pin2=machine.Pin(10) 
-scl_pin2=machine.Pin(11)
-i2c_eeprom=machine.I2C(1,sda = sda_pin2, scl = scl_pin2, freq = 100000)
-
-
 
 
 #=============================================================================
 #I2Cアドレス表示（デバック用）
-print("---address of eeproms and sensors---")
-for i in i2c_adc.scan():
+print("---address of eeproms and adc---")
+for i in i2c_eeprom.scan():
     d = hex(i)
     print("I2C_address; ",d)
 print("-----------------------------")
@@ -314,11 +314,11 @@ def write_to_eeprom(lis):
 '''
 経過時間（基準時刻との差）を得る関数
 '''
-"""
+
 def get_time():
     current_time = utime.ticks_diff(utime.ticks_ms(), start_time) // 1000  # 経過時間を計算し、秒単位に変換
     return current_time
-"""
+
 
 
 

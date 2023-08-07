@@ -44,10 +44,10 @@ def read():
     global 
     try:
         qua_w, qua_x, qua_y, qua_z = bno.quaternion()
+        gyro = bno.gyro()
     except:
         print('miss!')
-
-    
+ 
 read_timer.init(period=100, callback=read)
 
 def record(t):
@@ -58,6 +58,38 @@ def record(t):
         file = open(file_name, "a")
         init_sd_time = ticks_ms()
 record_timer.init(period=100, callback=record)
+
+def peak_detect():
+    global gyro
+    count = 0
+    while True:
+        now_data = gyro[2]
+        if triger == 0: 
+            if now_data > 0:
+                count += 1
+                if count >= 3:
+                    triger = 1
+                    count = 0
+            else:
+                count = 0
+                
+        if triger == 1:
+            if now_data < 0:
+                count += 1
+                if count >= 3:
+                    triger = 2
+                    barning_finish = True
+                    count = 0
+            else:
+                count = 0
+        if barning_finish:
+            if now_data > 0:
+                count += 1
+                if count >= 3:
+                    peak = True
+                    break
+            else:
+                count = 0
 
 def main():
     while True:

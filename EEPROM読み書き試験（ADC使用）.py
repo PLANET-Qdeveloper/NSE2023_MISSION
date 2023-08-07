@@ -264,42 +264,42 @@ def write_to_eeprom(lis):
 
 #########################################################
 
+def main():
 
-
-for i in range(count):
+    for i in range(count):
+        
+        list1 = format_decimal(read_adc())
+        #print("a:",list1)
+        '''list1 = ['1','0','0','6','.','5','5','1','0'] データを小数点を含め長さ９のリストのstr型要素に変換。'''
+        detect_dot(list1) #dot_posiの更新 ここで小数点の位置をdot_posiに代入している
+        list2 = exclude_dot(list1)
+        #print("b:",list2)
+        #print("dot:",dot_posi)
+        '''list2 = ['1','0','0','6','5','5','1','0'] リストから小数点を除外。要素数が8になる。'''
+        list3 = split_list(list2)
+        #print("c:",list3)
+        '''list3 = [10,6,55,10] 2要素ごとに分割したものを整数型に変換し、新たに長さ４のリストを作成'''
+        write_to_eeprom(list3)
+        '''1byte~4byte目にlist3の整数要素を、5byte目にdot_posiを書き込む。
+        これで気圧値1006.551がeepromに保存されたことになる。'''
+        print("writed_address!!",i)
+       
+        if FP.value() ==  1:
+            t = 100
+            print("FP")
+            pass
+        
+        elif addr >= 0xFFFF:
+            k = 1
+            addr = 0x0000
+            continue
+        
+         
     
-    list1 = format_decimal(read_adc())
-    #print("a:",list1)
-    '''list1 = ['1','0','0','6','.','5','5','1','0'] データを小数点を含め長さ９のリストのstr型要素に変換。'''
-    detect_dot(list1) #dot_posiの更新 ここで小数点の位置をdot_posiに代入している
-    list2 = exclude_dot(list1)
-    #print("b:",list2)
-    #print("dot:",dot_posi)
-    '''list2 = ['1','0','0','6','5','5','1','0'] リストから小数点を除外。要素数が8になる。'''
-    list3 = split_list(list2)
-    #print("c:",list3)
-    '''list3 = [10,6,55,10] 2要素ごとに分割したものを整数型に変換し、新たに長さ４のリストを作成'''
-    write_to_eeprom(list3)
-    '''1byte~4byte目にlist3の整数要素を、5byte目にdot_posiを書き込む。
-    これで気圧値1006.551がeepromに保存されたことになる。'''
-    print("writed_address!!",i)
-   
-    if FP.value() ==  1:
-        t = 100
-        print("FP")
-        pass
-    
-    elif addr >= 0xFFFF:
-        k = 1
-        addr = 0x0000
-        continue
+        
     
      
-
-    
-
- 
-print("write cycle over !!")
-########################################################
+    print("write cycle over !!")
+    ########################################################
 
 

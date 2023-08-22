@@ -35,7 +35,7 @@ spi = SPI(0, baudrate=32000000, sck=Pin(18), mosi=Pin(19), miso=Pin(16))
 #定数宣言
 addr = 0x0000 #書き込みを開始するメモリアドレス
 device_address = 84 #スレーブアドレス（EEPROM）
-count = 10922 #書き込みメインループの繰り返し回数
+count = 682 #書き込みメインループの繰り返し回数
 inter = 0.1 #データサンプリング周期（s）
 dot_posi = 0 #小数点の位置を表す変数
 

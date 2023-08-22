@@ -34,7 +34,7 @@ spi = SPI(0, baudrate=32000000, sck=Pin(18), mosi=Pin(19), miso=Pin(16))
 
 #定数宣言
 addr = 0x0000 #書き込みを開始するメモリアドレス
-device_address = [84,88] #スレーブアドレス（EEPROM）
+device_address = 84 #スレーブアドレス（EEPROM）
 k = 0 #スレーブアドレスリストの要素番号
 count = 10922 #書き込みメインループの繰り返し回数
 inter = 5 #データサンプリング周期（s）
@@ -44,6 +44,7 @@ dot_posi = 0 #小数点の位置を表す変数
 qua_w, qua_x, qua_y, qua_z = 0, 0, 0, 0
 gyro_x, gyro_y, gyro_z = 0, 0, 0
 difpres = 0
+
 
 
 # Timerオブジェクト
@@ -82,22 +83,22 @@ def read(t):
         print(FP)  
     except:
         print('miss!')
-read_timer.init(period=1000, callback=read)
+read_timer.init(period=100, callback=read)
 
 def record(t):
     global file, init_sd_time, qua_w, qua_x, qua_y, qua_z, gyro_x, gyro_y, gyro_z, FP, difpres
-    
-    mission_time = (ticks_ms() - init_mission_time)/1000
-    file.write("%f,%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n"%(mission_time, FP, gyro_x, gyro_y, gyro_z, qua_w, qua_x, qua_y, qua_z, difpres))
-    if (ticks_ms() - init_sd_time > 10000):    # 10秒ごとにclose()して保存する
-        file.close()
-        file = open(file_name, "a")
-        init_sd_time = ticks_ms()
-    '''        
+    try:
+        mission_time = (ticks_ms() - init_mission_time)/1000
+        file.write("%f,%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n"%(mission_time, FP, gyro_x, gyro_y, gyro_z, qua_w, qua_x, qua_y, qua_z, difpres))
+        if (ticks_ms() - init_sd_time > 10000):    # 10秒ごとにclose()して保存する
+            file.close()
+            file = open(file_name, "a")
+            init_sd_time = ticks_ms()
+           
     except:
         print('record error')
         pass
-    '''
+    
 record_timer.init(period=1000, callback=record)
   
                 
@@ -191,7 +192,11 @@ def write_to_eeprom(lis):
 
 
 def main():
-    global inter
+    while True:
+        if flight_pin.value() == 1:
+            print('start')
+            break
+              
     for i in range(count):
         
         list1 = format_decimal(read_adc())
@@ -199,15 +204,6 @@ def main():
         list2 = exclude_dot(list1)
         list3 = split_list(list2)
         write_to_eeprom(list3)
-       
-        if flight_pin.value() ==  1:
-            inter = 0.1
-            pass
-        
-        elif addr >= 0xFFFF:
-            k = 1
-            addr = 0x0000
-            continue
 
 
 if __name__=='__main__':

@@ -2,9 +2,9 @@ from machine import Pin,I2C
 import time, bme280
 
 #ピン初期化
-sda_pin=machine.Pin(10)
-scl_pin=machine.Pin(11)
-i2c=machine.I2C(1,sda = sda_pin, scl = scl_pin, freq = 100000)
+sda_pin=machine.Pin(4)
+scl_pin=machine.Pin(5)
+i2c=machine.I2C(0,sda = sda_pin, scl = scl_pin, freq = 100000)
 
 #bme = bme280.BME280(i2c=i2c)
 

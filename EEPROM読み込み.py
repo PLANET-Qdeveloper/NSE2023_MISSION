@@ -24,9 +24,8 @@ print("-----------------------------")
 
 '''定数設定・各変数初期設定'''
 addr = 0x0000 #開始するメモリアドレス
-device_address = [80,84] #スレーブアドレス（EEPROM）
-k = 0
-count = 10922 #メインループの繰り返し回数
+device_address = 84 #スレーブアドレス（EEPROM）
+count = 682 #メインループの繰り返し回数
 dot_posi = 0 #小数点の位置を表す変数
 
 time.sleep(0.1)
@@ -43,11 +42,11 @@ time.sleep(0.1)
 '''
 def writeData(buff):
     #print("buff>>",buff)
-    i2c.writeto_mem(device_address[k], addr, bytes(1), addrsize=16)
+    i2c.writeto_mem(device_address, addr, bytes(1), addrsize=16)
     time.sleep(0.01)
     
 def readData():
-    data = i2c.readfrom_mem(device_address[k], addr,1, addrsize = 16)
+    data = i2c.readfrom_mem(device_address, addr,1, addrsize = 16)
     time.sleep(0.01)
     return data
 '''
@@ -85,10 +84,7 @@ time.sleep(1)
 for i in range (count):
     print(read_eeprom())
     
-    if addr >= 0xFFFF:
-            k = 1
-            addr = 0x0000
-            continue
+    
     
     
 print("reading is over !")    

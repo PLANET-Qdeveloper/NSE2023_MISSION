@@ -81,6 +81,65 @@ def read_eeprom():
     return lis_readData 
 
 
+'''
+関数 convert_list
+list(int型) >>> list(str型), int値
+与えられた1桁or2桁非負整数からなる長さ５のリスト（関数read_eepromが返すリスト）を受け、
+前半4つの整数を順番に取り出し、2文字の要素4つを持つstr型リスト(new_list)の要素とし
+て格納し、5番目の整数をint型のままfifth_numとして出力する関数。与えられたリストの前半
+４つの要素に1桁の整数がある場合、2 >> '02'のように適宜0で埋めて2文字に調節する。0も
+同様に'00'とする。fifth_numは気圧データの小数点位置を特定する情報である。
+
+例:
+num_list = [10, 4, 0, 23, 4]
+new_list >>> ['10', '04', '00', '23']
+fifth_num = 4
+
+'''
+def convert_list(num_list):
+    new_list = []
+    for num in num_list[:4]:
+        if num < 10:
+            new_list.append('0' + str(num))
+        else:
+            new_list.append(str(num))
+    fifth_num = num_list[4]
+    #print("new_list, fifth_num: ",new_list, fifth_num)
+    return new_list, fifth_num
+
+
+
+
+'''
+関数 create_decimal
+list（str型） ,int値　>>>　float値
+convert_listから出力されるリストと整数を受けて、もとの気圧データを完全に復元する関数。
+出力decorded_dataは8桁の小数となる。
+
+例:
+new_list = ['10', '04', '00', '23']
+fifth_num = 4
+ decorded_data >>> 1004.0023
+
+引数を2つとることに注意
+'''
+def create_decimal(new_list, fifth_num):
+    # 1文字ごとに分割した新しいリストを作成
+    new_list_split = []
+    for string in new_list:
+        for char in string:
+            new_list_split.append(char)
+    
+    # 5番目の文字の前に'.'を追加して、リストを長さ9にする
+    new_list_split.insert(fifth_num, '.')
+    new_list_split = new_list_split[:9]
+    
+    # 文字列に変換して小数値に変換
+    decimal_str = ''.join(new_list_split)
+    return float(decimal_str)
+
+
+
     
     
 time.sleep(0.1)

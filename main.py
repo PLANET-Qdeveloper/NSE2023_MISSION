@@ -3,18 +3,16 @@ from utime import sleep, ticks_ms
 import os
 
 import sdcard
-from bno055 import BNO055
 
 
 i2c_0 =  I2C(0, scl=Pin(5), sda=Pin(4), freq=100000)
 i2c_1 =  I2C(1, scl=Pin(27), sda=Pin(26),freq=100000)
 
-bno = BNO055(i2c_0)
 eeprom = i2c_0
 adc = i2c_1
 
 #I2Cアドレス表示（デバック用）
-print("---address of bno and eeproms---")
+print("---address of eeprom---")
 for i in i2c_0.scan():
     d = hex(i)
     print("I2C_address; ",d)
@@ -26,7 +24,7 @@ for i in i2c_1.scan():
     print("I2C_address; ",d)
 print("-----------------------------")
 
-flight_pin = Pin(0, Pin.IN, Pin.PULL_DOWN)
+flight_pin = Pin(20, Pin.IN, Pin.PULL_DOWN)
 led = Pin(15, Pin.OUT)
 
 cs = Pin(17, Pin.OUT)    #SDカード
@@ -40,9 +38,7 @@ inter = 0.1 #データサンプリング周期（s）
 dot_posi = 0 #小数点の位置を表す変数
 
 #変数宣言
-qua_w, qua_x, qua_y, qua_z = 0, 0, 0, 0
-gyro_x, gyro_y, gyro_z = 0, 0, 0
-difpres = 0
+difpres_read = 0
 
 
 
@@ -69,26 +65,29 @@ while True:
         file_index += 1
         file_name = '/sd/NSE_2023_MISSION'+str(file_index)+'.txt'
 
-file.write("mission_time,flight_pin,gyro_x,gyro_y,gyro_z,quaternion_w,quaternion_x,quaternion_y,quaternion_z,differential pressure\r\n")
+file.write("mission_time,flight_pin,differential pressure\r\n")
 
 sleep(0.1)
 
 def read(t):
-    global qua_w, qua_x, qua_y, qua_z, gyro_x, gyro_y, gyro_z, FP
+    global FP, difpres_read
     try:
-        qua_w, qua_x, qua_y, qua_z = bno.quaternion()
-        gyro_x, gyro_y, gyro_z = bno.gyro()
         FP = flight_pin.value()
         print(FP)  
     except:
         print('miss!')
-read_timer.init(period=100, callback=read)
+        
+    try:
+        difpres_read = read_adc()  
+    except:
+        print('no data')
+read_timer.init(period=1000, callback=read)
 
 def record(t):
-    global file, init_sd_time, qua_w, qua_x, qua_y, qua_z, gyro_x, gyro_y, gyro_z, FP, difpres
+    global file, init_sd_time, FP, difpres_read
     try:
         mission_time = (ticks_ms() - init_mission_time)/1000
-        file.write("%f,%d,%f,%f,%f,%f,%f,%f,%f,%f\r\n"%(mission_time, FP, gyro_x, gyro_y, gyro_z, qua_w, qua_x, qua_y, qua_z, difpres))
+        file.write("%f,%d,%f\r\n"%(mission_time, FP, difpres_read))
         if (ticks_ms() - init_sd_time > 10000):    # 10秒ごとにclose()して保存する
             file.close()
             file = open(file_name, "a")
@@ -108,10 +107,11 @@ def read_adc():
         sleep(inter)
         data = i2c_1.readfrom(0x68, 3)
         data1 = (data[0] << 8) | data[1]
-         
+        print('data:',data1) 
         voltage = data1 * 2.047 /  32767
         difpres = ( voltage / 5  - 0.04) / 0.0012858
         
+        print(difpres)
         if difpres < 0:
             difpres = 0
         
@@ -126,7 +126,7 @@ def read_adc():
 
 
 def writeData(buff):
-    i2c_0.writeto_mem(device_address[k], addr, bytes([buff & 0xFF]), addrsize=16)
+    i2c_0.writeto_mem(device_address, addr, bytes([buff & 0xFF]), addrsize=16)
     sleep(0.01)
     
 
@@ -191,11 +191,12 @@ def write_to_eeprom(lis):
 
 
 def main():
+    sleep(5)
     while True:
         if flight_pin.value() == 1:
             print('start')
             break
-              
+
     for i in range(count):
         
         list1 = format_decimal(read_adc())

@@ -25,9 +25,8 @@ print("-----------------------------")
 
 '''------------定数設定・各変数初期設定-----------'''
 addr = 0x0000 #書き込みを開始するメモリアドレス
-device_address = [80,84] #スレーブアドレス（EEPROM）
-k = 0 #スレーブアドレスリストの要素番号
-count = 10922 #書き込みメインループの繰り返し回数
+device_address = 84 #スレーブアドレス（EEPROM）
+count = 622 #書き込みメインループの繰り返し回数
 dot_posi = 0 #小数点の位置を表す変数
 
 header = ['address','pressure']# ファイルに書き込むヘッダー
@@ -49,11 +48,11 @@ time.sleep(0.1)
 '''
 def writeData(buff):
     #print("buff>>",buff)
-    i2c.writeto_mem(device_address[k], addr, bytes([buff & 0xFF]), addrsize=16)
+    i2c.writeto_mem(device_address, addr, bytes([buff & 0xFF]), addrsize=16)
     time.sleep(0.01)
     
 def readData():
-    data = i2c.readfrom_mem(device_address[k], addr,1, addrsize = 16)
+    data = i2c.readfrom_mem(device_address, addr,1, addrsize = 16)
     return data
 
 
@@ -366,10 +365,7 @@ for i in range(count):
     これで気圧値1006.551がeepromに保存されたことになる。'''
     print("address!!",addr)
     
-    if addr >= 0xFFFF:
-        k = 1
-        addr = 0x0000
-        continue
+    
        
  
 print("write cycle over !!") 
@@ -401,10 +397,7 @@ with open(filename, "w") as f:
         f.flush() 
         time.sleep(0.1)
         
-        if addr >= 0xFFFF:
-            k = 1
-            addr = 0x0000
-            continue
+        
 f.close()   
 print("read cycle over \n DONE!!")    
     

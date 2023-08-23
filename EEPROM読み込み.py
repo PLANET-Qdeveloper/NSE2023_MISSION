@@ -74,18 +74,22 @@ def read_eeprom():
         addr += 1
         #print("reading!!")
     decorded_posi = int.from_bytes(readData(), 'big')
-    decorded_lis.append(decorded_posi)    
-    #print("lis_readData ",decorded_lis)
+    lis_readData.append(decorded_posi)    
+    #print("lis_readData ",lis_readData)
     addr += 1
     #print(addr)
-    c1 = convert_list(decorded_lis)[0]
-    c2 = convert_list(decorded_lis)[1]
-    result = create_decimal(c1,c2)
-    print("result; ",result)   
+    return lis_readData 
+
+
     
-time.sleep(1)
+    
+time.sleep(0.1)
 for i in range (count):
-    print(read_eeprom())
+    result = convert_list(read_eeprom())
+    data = create_decimal(result[0], result[1])
+    #data = create_decimal( convert_list(read_eeprom())[0], convert_list(read_eeprom())[1] )
+    print("decorded_press:",data)
+    #print("address",addr)
     
     
     

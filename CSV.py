@@ -1,3 +1,5 @@
+
+
 from machine import Pin,I2C 
 import time, bme280
 
@@ -7,7 +9,7 @@ sda_pin=machine.Pin(16)
 scl_pin=machine.Pin(17)
 i2c=machine.I2C(0,sda = sda_pin, scl = scl_pin, freq = 100000)
 
-bme = bme280.BME280(i2c=i2c)
+
 
 
 '''
@@ -26,7 +28,9 @@ print("-----------------------------")
 '''------------定数設定・各変数初期設定-----------'''
 addr = 0x0000 #書き込みを開始するメモリアドレス
 device_address = 84 #スレーブアドレス（EEPROM）
-count = 622 #書き込みメインループの繰り返し回数
+#k = 0 #スレーブアドレスリストの要素番号
+count = 700 #書き込みメインループの繰り返し回数
+#厳密には682
 dot_posi = 0 #小数点の位置を表す変数
 
 header = ['address','pressure']# ファイルに書き込むヘッダー
@@ -46,13 +50,15 @@ time.sleep(0.1)
 '''
 #基本関数定義
 '''
+'''
 def writeData(buff):
     #print("buff>>",buff)
-    i2c.writeto_mem(device_address, addr, bytes([buff & 0xFF]), addrsize=16)
+    i2c.writeto_mem(device_address[k], addr, bytes([buff & 0xFF]), addrsize=16)
     time.sleep(0.01)
-    
+'''
+
 def readData():
-    data = i2c.readfrom_mem(device_address, addr,1, addrsize = 16)
+    data = i2c.readfrom_mem(device_address[k], addr,1, addrsize = 16)
     return data
 
 
@@ -63,7 +69,7 @@ def readData():
 関数read_bme280
 bme280から10回気圧データを読み出し、その平均値をfloat型として返す関数
 データを返す周期は0.1秒
-'''
+
 def read_bme280():
     lis = []
     for i in range(10):
@@ -75,7 +81,7 @@ def read_bme280():
     p_ave = float(sum(lis) / 10 )
     print("p_ave: ",p_ave)
     return p_ave
-    
+'''    
 
 
 
@@ -344,7 +350,7 @@ def create_decimal(new_list, fifth_num):
 
 
 '''メインの書き込みサイクル'''
-
+"""
 for i in range(count):
     
     '''read_bme = 1006.551(float)'''
@@ -365,11 +371,17 @@ for i in range(count):
     これで気圧値1006.551がeepromに保存されたことになる。'''
     print("address!!",addr)
     
-    
+    if addr >= 0xFFFF:
+        k = 1
+        addr = 0x0000
+        continue
        
  
 print("write cycle over !!") 
 #書き込みサイクル終了後、読み込みに移行するまでの待機時間 
+"""
+
+
 time.sleep(0.1)
 
 #読み込みを開始するメモリアドレスの初期値
@@ -396,8 +408,12 @@ with open(filename, "w") as f:
         f.write(str(data) + "\n")
         f.flush() 
         time.sleep(0.1)
-        
-        
+        """
+        if addr >= 0xFFFF:
+            k = 1
+            addr = 0x0000
+            continue
+        """    
 f.close()   
 print("read cycle over \n DONE!!")    
     
